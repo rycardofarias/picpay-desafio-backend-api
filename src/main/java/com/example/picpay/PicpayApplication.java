@@ -1,13 +1,13 @@
-package com.example.picpaydesafiobackend;
+package com.example.picpay;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class PicpayDesafioBackendApplication {
+public class PicpayApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(PicpayDesafioBackendApplication.class, args);
+		SpringApplication.run(PicpayApplication.class, args);
 	}
 
 }
