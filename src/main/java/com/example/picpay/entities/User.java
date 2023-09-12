@@ -1,12 +1,12 @@
-package entities;
-import entities.enums.UserType;
+package com.example.picpay.entities;
+import com.example.picpay.entities.enums.UserType;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
-@Entity(name = "users")
-@Table(name = "users")
+@Entity
+@Table(name = "tb_users")
 public class User {
 
     @Id
