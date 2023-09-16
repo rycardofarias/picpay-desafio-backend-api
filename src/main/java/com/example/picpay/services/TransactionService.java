@@ -9,14 +9,11 @@ import com.example.picpay.exceptions.TransactionValidationException;
 import com.example.picpay.exceptions.messages.ExceptionMessages;
 import com.example.picpay.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Service
 public class TransactionService {
@@ -30,7 +27,10 @@ public class TransactionService {
     @Autowired
     private RestTemplate restTemplate;
 
-    public void createTransaction(TransactionDTO transactionDTO) throws Exception{
+    @Autowired
+    private NotificationService notificationService;
+
+    public Transaction createTransaction(TransactionDTO transactionDTO) throws Exception{
         User sender = this.userService.findUserById(transactionDTO.senderId());
         User receiver = this.userService.findUserById(transactionDTO.receiverId());
 
@@ -52,17 +52,31 @@ public class TransactionService {
 
         this.transactionRepository.save(transaction);
         this.transactionRepository.save(transaction);
+
+        this.notificationService.sendNotification(sender, ConstantVariables.TRANSACTION_COMPLETED_SUCCESSFULLY);
+        this.notificationService.sendNotification(receiver, ConstantVariables.TRANSACTION_RECEIVED_SUCCESSFULLY);
+
+        return transaction;
     }
+
+//    public boolean authorizeTransaction(User sender, BigDecimal value) {
+//        ResponseEntity<Map> authorizationResponse = restTemplate.getForEntity(
+//                EnvironmentVariable.VAR_AUTHORIZED, Map.class);
+//
+//        if (authorizationResponse.getStatusCode() == HttpStatus.OK) {
+//            String message = (String) authorizationResponse.getBody().get("message");
+//            return ConstantVariables.AUTHORIZED.equalsIgnoreCase(message);
+//        } else{
+//            return false;
+//        }
+//    }
 
     public boolean authorizeTransaction(User sender, BigDecimal value) {
-        ResponseEntity<Map> authorizationResponse = restTemplate.getForEntity(
-                AuthorizeTransaction.checksAuthorization(), Map.class);
 
-        if (authorizationResponse.getStatusCode() == HttpStatus.OK) {
-            String message = (String) authorizationResponse.getBody().get("message");
-            return ConstantVariables.AUTHOTIZED.equalsIgnoreCase(message);
-        } else{
-            return false;
-        }
+        String authorizationResponse = AuthorizeTransaction.checksAuthorization();
+
+        return ConstantVariables.AUTHORIZED.equalsIgnoreCase(authorizationResponse);
     }
+
+
 }
