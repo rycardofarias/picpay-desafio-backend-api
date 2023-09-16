@@ -1,7 +1,7 @@
 package com.example.picpay.services;
 
+import com.example.picpay.config.variables.AuthorizeTransaction;
 import com.example.picpay.config.variables.ConstantVariables;
-import com.example.picpay.config.variables.EnvironmentVariable;
 import com.example.picpay.dtos.TransactionDTO;
 import com.example.picpay.entities.Transaction;
 import com.example.picpay.entities.User;
@@ -49,11 +49,11 @@ public class TransactionService {
     }
 
     public boolean authorizeTransaction(User sender, BigDecimal value) {
-        ResponseEntity<Map> authoriResponse = restTemplate.getForEntity(
-                EnvironmentVariable.VAR_AUTHORIZER, Map.class);
+        ResponseEntity<Map> authorizationResponse = restTemplate.getForEntity(
+                AuthorizeTransaction.checksAuthorization(), Map.class);
 
-        if (authoriResponse.getStatusCode() == HttpStatus.OK) {
-            String message = (String) authoriResponse.getBody().get("message");
+        if (authorizationResponse.getStatusCode() == HttpStatus.OK) {
+            String message = (String) authorizationResponse.getBody().get("message");
             return ConstantVariables.AUTHOTIZED.equalsIgnoreCase(message);
         } else{
             return false;
