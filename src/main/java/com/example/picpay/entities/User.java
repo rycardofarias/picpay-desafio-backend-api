@@ -1,5 +1,5 @@
 package com.example.picpay.entities;
-import com.example.picpay.entities.enums.UserType;
+import com.example.picpay.enums.UserType;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
