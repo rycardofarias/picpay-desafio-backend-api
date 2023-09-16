@@ -1,7 +1,7 @@
 package com.example.picpay.services;
 
 import com.example.picpay.entities.User;
-import com.example.picpay.entities.enums.UserType;
+import com.example.picpay.enums.UserType;
 import com.example.picpay.exceptions.DocumentValidationException;
 import com.example.picpay.exceptions.TransactionValidationException;
 import com.example.picpay.exceptions.UserValidationException;
