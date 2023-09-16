@@ -1,6 +1,6 @@
 package com.example.picpay.enums;
 
 public enum UserType {
-    COMMUN,
+    COMMON,
     MERCHANT
 }

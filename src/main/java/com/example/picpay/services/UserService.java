@@ -60,7 +60,7 @@ public class UserService {
             throw new DocumentValidationException(ExceptionMessages.USER_DOCUMENT_ALREADY_REGISTERED + user.getDocument());
         }
 
-        if(!DocumentValid.isCNPJValid(user.getDocument())){
+        if(!DocumentValid.isCPFValid(user.getDocument())){
             throw new DocumentValidationException(ExceptionMessages.USER_DOCUMENT_INVALID + user.getDocument());
         }
 
