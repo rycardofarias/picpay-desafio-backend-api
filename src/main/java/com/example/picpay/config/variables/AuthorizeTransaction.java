@@ -5,9 +5,9 @@ import java.util.Random;
 public class AuthorizeTransaction {
 
     public static String checksAuthorization() {
-        int randomNumber = new Random().nextInt(2);
+        int randomNumber = new Random().nextInt(9);
 
-        if(randomNumber == 0) return ConstantVariables.AUTHOTIZED;
+        if(randomNumber <= 7) return ConstantVariables.AUTHOTIZED;
         else return ConstantVariables.UNAUTHORIZED;
     }
 }
