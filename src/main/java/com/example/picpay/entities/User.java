@@ -1,4 +1,5 @@
 package com.example.picpay.entities;
+import com.example.picpay.dtos.UserDTO;
 import com.example.picpay.enums.UserType;
 import jakarta.persistence.*;
 
@@ -43,6 +44,16 @@ public class User {
         this.password = password;
         this.balance = balance;
         this.userType = userType;
+    }
+
+    public User(UserDTO userDTO) {
+
+        this.firstName = userDTO.firstName();
+        this.lastName = userDTO.lastName();
+        this.document = userDTO.document();
+        this.email = userDTO.email();
+        this.password = userDTO.password();
+        this.balance = userDTO.balance();
     }
 
     public Long getId() {
