@@ -17,4 +17,7 @@ public class ExceptionMessages {
     public static final String USER_DOCUMENT_ALREADY_REGISTERED = "Document already registered: ";
 
     public static final String USER_DOCUMENT_INVALID = "Document invalid: ";
+
+    public static final String TRANSACTION_NOT_AUTHORIZED = "Trasaction not autorized.";
+
 }
