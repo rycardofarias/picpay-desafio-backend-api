@@ -1,5 +1,6 @@
 package com.example.picpay.services;
 
+import com.example.picpay.dtos.UserDTO;
 import com.example.picpay.entities.User;
 import com.example.picpay.enums.UserType;
 import com.example.picpay.exceptions.DocumentValidationException;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -39,7 +41,16 @@ public class UserService {
                 .orElseThrow(() -> new UserValidationException(ExceptionMessages.USER_CANNOT_BE_NULL));
     }
 
-    public User  saveUser(User user) throws Exception {
+    public User createUser(UserDTO userDTO) throws UserValidationException, DocumentValidationException {
+
+        User user = new User(userDTO);
+        validateUser(user);
+
+        return this.userRepository.save(user);
+
+    }
+
+    private void validateUser(User user) throws UserValidationException, DocumentValidationException {
 
         if (user == null) {
             throw new UserValidationException(ExceptionMessages.USER_CANNOT_BE_NULL);
@@ -48,14 +59,16 @@ public class UserService {
         if (userRepository.existsByDocument(user.getDocument())) {
             throw new DocumentValidationException(ExceptionMessages.USER_DOCUMENT_ALREADY_REGISTERED + user.getDocument());
         }
-        if(!DocumentValid.isCPFValid(user.getDocument())){
+
+        if(!DocumentValid.isCNPJValid(user.getDocument())){
             throw new DocumentValidationException(ExceptionMessages.USER_DOCUMENT_INVALID + user.getDocument());
         }
 
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new UserValidationException(ExceptionMessages.USER_EMAIL_ALREADY_REGISTERED + user.getEmail());
         }
-
-        return this.userRepository.save(user);
+    }
+    public List<User> getAllUsers() {
+        return this.userRepository.findAll();
     }
 }
