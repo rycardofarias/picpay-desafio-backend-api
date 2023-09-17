@@ -54,6 +54,7 @@ public class User {
         this.email = userDTO.email();
         this.password = userDTO.password();
         this.balance = userDTO.balance();
+        this.userType = userDTO.userType();
     }
 
     public Long getId() {
