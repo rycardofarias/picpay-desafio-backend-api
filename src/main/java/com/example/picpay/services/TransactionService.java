@@ -9,11 +9,14 @@ import com.example.picpay.exceptions.TransactionValidationException;
 import com.example.picpay.exceptions.messages.ExceptionMessages;
 import com.example.picpay.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
 public class TransactionService {
@@ -59,24 +62,15 @@ public class TransactionService {
         return transaction;
     }
 
-//    public boolean authorizeTransaction(User sender, BigDecimal value) {
-//        ResponseEntity<Map> authorizationResponse = restTemplate.getForEntity(
-//                EnvironmentVariable.VAR_AUTHORIZED, Map.class);
-//
-//        if (authorizationResponse.getStatusCode() == HttpStatus.OK) {
-//            String message = (String) authorizationResponse.getBody().get("message");
-//            return ConstantVariables.AUTHORIZED.equalsIgnoreCase(message);
-//        } else{
-//            return false;
-//        }
-//    }
-
     public boolean authorizeTransaction(User sender, BigDecimal value) {
+        ResponseEntity<Map> authorizationResponse = restTemplate.getForEntity(
+                AuthorizeTransaction.checksAuthorization(), Map.class);
 
-        String authorizationResponse = AuthorizeTransaction.checksAuthorization();
-
-        return ConstantVariables.AUTHORIZED.equalsIgnoreCase(authorizationResponse);
+        if (authorizationResponse.getStatusCode() == HttpStatus.OK) {
+            String message = (String) authorizationResponse.getBody().get("message");
+            return ConstantVariables.AUTHORIZED.equalsIgnoreCase(message);
+        } else{
+            return false;
+        }
     }
-
-
 }

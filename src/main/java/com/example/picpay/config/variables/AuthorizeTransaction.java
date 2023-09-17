@@ -7,7 +7,7 @@ public class AuthorizeTransaction {
     public static String checksAuthorization() {
         int randomNumber = new Random().nextInt(9);
 
-        if(randomNumber <= 7) return ConstantVariables.AUTHORIZED;
-        else return ConstantVariables.UNAUTHORIZED;
+        if(randomNumber <= 7) return EnvironmentVariable.VAR_AUTHORIZED;
+        else return EnvironmentVariable.VAR_UNAUTHORIZED;
     }
 }
