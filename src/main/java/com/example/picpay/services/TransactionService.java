@@ -54,7 +54,8 @@ public class TransactionService {
         receiver.setBalance(receiver.getBalance().add(transactionDTO.value()));
 
         this.transactionRepository.save(transaction);
-        this.transactionRepository.save(transaction);
+        this.userService.saveUser(sender);
+        this.userService.saveUser(receiver);
 
         this.notificationService.sendNotification(sender, ConstantVariables.TRANSACTION_COMPLETED_SUCCESSFULLY);
         this.notificationService.sendNotification(receiver, ConstantVariables.TRANSACTION_RECEIVED_SUCCESSFULLY);

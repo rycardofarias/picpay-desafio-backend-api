@@ -45,9 +45,12 @@ public class UserService {
 
         User user = new User(userDTO);
         validateUser(user);
+        return saveUser(user);
+    }
+
+    public User saveUser(User user) throws UserValidationException, DocumentValidationException {
 
         return this.userRepository.save(user);
-
     }
 
     private void validateUser(User user) throws UserValidationException, DocumentValidationException {
@@ -60,7 +63,7 @@ public class UserService {
             throw new DocumentValidationException(ExceptionMessages.USER_DOCUMENT_ALREADY_REGISTERED + user.getDocument());
         }
 
-        if(!DocumentValid.isCPFValid(user.getDocument())){
+        if (!DocumentValid.isCPFValid(user.getDocument())) {
             throw new DocumentValidationException(ExceptionMessages.USER_DOCUMENT_INVALID + user.getDocument());
         }
 
@@ -68,7 +71,9 @@ public class UserService {
             throw new UserValidationException(ExceptionMessages.USER_EMAIL_ALREADY_REGISTERED + user.getEmail());
         }
     }
+
     public List<User> getAllUsers() {
         return this.userRepository.findAll();
     }
+
 }
