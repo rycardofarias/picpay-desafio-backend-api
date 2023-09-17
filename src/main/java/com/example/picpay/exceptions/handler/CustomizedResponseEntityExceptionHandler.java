@@ -21,37 +21,38 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
     @ExceptionHandler(TransactionValidationException.class)
     public final ResponseEntity<ExceptionResponse> handleTransactionValidationException(TransactionValidationException ex,  WebRequest request) {
 
-        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(),
-                ex.getMessage(),
-                request.getDescription(false), HttpStatus.BAD_REQUEST.value());
-        return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+        return createExceptionResponse(ex.getMessage(), ex.getStatusCode(), request);
     }
 
     @ExceptionHandler(UserValidationException.class)
     public final ResponseEntity<ExceptionResponse> handleUserValidationException(UserValidationException ex,  WebRequest request) {
 
-        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(),
-                ex.getMessage(),
-                request.getDescription(false), HttpStatus.BAD_REQUEST.value());
-        return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+        return createExceptionResponse(ex.getMessage(), ex.getStatusCode(), request);
     }
 
     @ExceptionHandler(DocumentValidationException.class)
     public final ResponseEntity<ExceptionResponse> handleUserValidationException(DocumentValidationException ex,  WebRequest request) {
 
-        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(),
-                ex.getMessage(),
-                request.getDescription(false), HttpStatus.BAD_REQUEST.value());
-        return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+        return createExceptionResponse(ex.getStatusCode(), request);
     }
 
     public final ResponseEntity<ExceptionResponse> handleAllExceptins(Exception ex, WebRequest request){
 
-        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(),
-                ex.getMessage(),
-                request.getDescription(false),
-                HttpStatus.INTERNAL_SERVER_ERROR.value());
-        return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        return createExceptionResponse(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
+    private ResponseEntity<ExceptionResponse> createExceptionResponse(String message, HttpStatus status, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(
+                new Date(),
+                message,
+                request.getDescription(false),
+                status.value()
+        );
+
+        return new ResponseEntity<>(exceptionResponse, status);
+    }
+
+    private ResponseEntity<ExceptionResponse> createExceptionResponse(HttpStatus status, WebRequest request) {
+        return createExceptionResponse(status.getReasonPhrase(), status, request);
+    }
 }

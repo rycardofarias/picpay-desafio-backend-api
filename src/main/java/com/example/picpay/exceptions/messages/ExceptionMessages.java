@@ -21,4 +21,6 @@ public class ExceptionMessages {
     public static final String TRANSACTION_NOT_AUTHORIZED = "Trasaction not autorized.";
 
     public static final String NOTIFICATION_SERVICE_UNAVAILABLE = "Notification service unavailable.";
+
+    public static final String SERVICE_UNAVAILABLE_OR_DOWN = "Trasaction not autorized. The service is unavailable or down.";
 }

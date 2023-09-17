@@ -1,12 +1,17 @@
 package com.example.picpay.exceptions;
 
+import org.springframework.http.HttpStatus;
+
 public class TransactionValidationException  extends Exception {
 
-    public TransactionValidationException(String message) {
+    private final HttpStatus statusCode;
+
+    public TransactionValidationException(String message, HttpStatus statusCode) {
         super(message);
+        this.statusCode = statusCode;
     }
 
-    public TransactionValidationException(String message, Throwable cause) {
-        super(message, cause);
+    public HttpStatus getStatusCode() {
+        return statusCode;
     }
 }

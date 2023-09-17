@@ -1,5 +1,9 @@
 package com.example.picpay.validation.documents;
 
+import com.example.picpay.exceptions.DocumentValidationException;
+import com.example.picpay.exceptions.messages.ExceptionMessages;
+import org.springframework.http.HttpStatus;
+
 public class DocumentValid {
 
     private static String removeNonDigits(String input) {
@@ -20,11 +24,11 @@ public class DocumentValid {
         return (remainder < 2) ? 0 : (11 - remainder);
     }
 
-    public static boolean isCPFValid(String cpf) {
+    public static boolean isCPFValid(String cpf) throws DocumentValidationException {
         cpf = removeNonDigits(cpf);
 
         if (cpf.length() != 11 || hasRepeatedDigits(cpf)) {
-            throw new IllegalArgumentException("CPF inválido: " + cpf);
+            throw new DocumentValidationException(ExceptionMessages.USER_DOCUMENT_INVALID + cpf, HttpStatus.BAD_REQUEST);
         }
 
         int[] numbers = new int[11];
@@ -40,11 +44,11 @@ public class DocumentValid {
         return (digit1 == numbers[9]) && (digit2 == numbers[10]);
     }
 
-    public static boolean isCNPJValid(String cnpj) {
+    public static boolean isCNPJValid(String cnpj) throws DocumentValidationException {
         cnpj = removeNonDigits(cnpj);
 
         if (cnpj.length() != 14 || hasRepeatedDigits(cnpj)) {
-            throw new IllegalArgumentException("CNPJ inválido: " + cnpj);
+            throw new DocumentValidationException(ExceptionMessages.USER_DOCUMENT_INVALID + cnpj, HttpStatus.BAD_REQUEST);
         }
 
         int[] numbers = new int[14];

@@ -1,11 +1,17 @@
 package com.example.picpay.exceptions;
 
+import org.springframework.http.HttpStatus;
+
 public class NotificationException extends Exception{
-    public NotificationException(String message) {
+
+    private final HttpStatus statusCode;
+
+    public NotificationException(String message, HttpStatus statusCode) {
         super(message);
+        this.statusCode = statusCode;
     }
 
-    public NotificationException(String message, Throwable cause) {
-        super(message, cause);
+    public HttpStatus getStatusCode() {
+        return statusCode;
     }
 }
