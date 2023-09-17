@@ -5,6 +5,8 @@ import com.example.picpay.config.variables.ConstantVariables;
 import com.example.picpay.dtos.TransactionDTO;
 import com.example.picpay.entities.Transaction;
 import com.example.picpay.entities.User;
+import com.example.picpay.enums.UserType;
+import com.example.picpay.exceptions.NotificationException;
 import com.example.picpay.exceptions.TransactionValidationException;
 import com.example.picpay.exceptions.messages.ExceptionMessages;
 import com.example.picpay.repository.TransactionRepository;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
@@ -33,44 +36,82 @@ public class TransactionService {
     @Autowired
     private NotificationService notificationService;
 
-    public Transaction createTransaction(TransactionDTO transactionDTO) throws Exception{
-        User sender = this.userService.findUserById(transactionDTO.senderId());
-        User receiver = this.userService.findUserById(transactionDTO.receiverId());
+    @Transactional
+    public Transaction createTransaction(TransactionDTO transactionDTO) throws Exception {
+        User sender = userService.findUserById(transactionDTO.senderId());
+        User receiver = userService.findUserById(transactionDTO.receiverId());
 
-        userService.validateTransaction(sender, transactionDTO.value());
+        validateTransaction(sender, transactionDTO.value());
 
-        boolean isAuthorized = this.authorizeTransaction(sender, transactionDTO.value());
-        if(!isAuthorized){
-            throw new TransactionValidationException(ExceptionMessages.TRANSACTION_NOT_AUTHORIZED);
-        }
+        authorizeTransactionOrThrow(sender, transactionDTO.value());
 
-        Transaction transaction = new Transaction();
-        transaction.setAmount(transactionDTO.value());
-        transaction.setSender(sender);
-        transaction.setReceiver(receiver);
-        transaction.setTimestamp(LocalDateTime.now());
+        Transaction transaction = createAndSaveTransaction(sender, receiver, transactionDTO.value());
 
-        sender.setBalance(sender.getBalance().subtract(transactionDTO.value()));
-        receiver.setBalance(receiver.getBalance().add(transactionDTO.value()));
+        updateSenderAndReceiverBalances(sender, receiver, transactionDTO.value());
 
-        this.transactionRepository.save(transaction);
-        this.userService.saveUser(sender);
-        this.userService.saveUser(receiver);
-
-        this.notificationService.sendNotification(sender, ConstantVariables.TRANSACTION_COMPLETED_SUCCESSFULLY);
-        this.notificationService.sendNotification(receiver, ConstantVariables.TRANSACTION_RECEIVED_SUCCESSFULLY);
+        sendNotifications(sender, receiver);
 
         return transaction;
     }
 
-    public boolean authorizeTransaction(User sender, BigDecimal value) {
-        ResponseEntity<Map> authorizationResponse = restTemplate.getForEntity(
-                AuthorizeTransaction.checksAuthorization(), Map.class);
+    private void validateTransaction(User sender, BigDecimal value) throws TransactionValidationException {
 
-        if (authorizationResponse.getStatusCode() == HttpStatus.OK) {
-            String message = (String) authorizationResponse.getBody().get("message");
-            return ConstantVariables.AUTHORIZED.equalsIgnoreCase(message);
-        } else{
+        if (sender.getUserType() == UserType.MERCHANT) {
+            throw new TransactionValidationException(ExceptionMessages.USER_NOT_AUTHORIZED, HttpStatus.FORBIDDEN);
+        }
+
+        if (sender.getBalance().compareTo(value) < 0) {
+            throw new TransactionValidationException(ExceptionMessages.INSUFFICIENT_FOUNDS, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private void authorizeTransactionOrThrow(User sender, BigDecimal value) throws Exception {
+
+        boolean isAuthorized = authorizeTransaction(sender, value);
+        if (!isAuthorized) {
+            throw new TransactionValidationException(ExceptionMessages.TRANSACTION_NOT_AUTHORIZED, HttpStatus.FORBIDDEN);
+        }
+    }
+
+    private Transaction createAndSaveTransaction(User sender, User receiver, BigDecimal value) {
+
+        Transaction transaction = new Transaction();
+        transaction.setAmount(value);
+        transaction.setSender(sender);
+        transaction.setReceiver(receiver);
+        transaction.setTimestamp(LocalDateTime.now());
+
+        return transactionRepository.save(transaction);
+    }
+
+    private void updateSenderAndReceiverBalances(User sender, User receiver, BigDecimal value) {
+
+        sender.setBalance(sender.getBalance().subtract(value));
+        receiver.setBalance(receiver.getBalance().add(value));
+
+        userService.saveUser(sender);
+        userService.saveUser(receiver);
+    }
+
+    private void sendNotifications(User sender, User receiver) throws NotificationException {
+
+        notificationService.sendNotification(sender, ConstantVariables.TRANSACTION_COMPLETED_SUCCESSFULLY);
+        notificationService.sendNotification(receiver, ConstantVariables.TRANSACTION_RECEIVED_SUCCESSFULLY);
+    }
+
+    public boolean authorizeTransaction(User sender, BigDecimal value) throws Exception {
+
+        try {
+            ResponseEntity<Map> authorizationResponse = restTemplate.getForEntity(
+                    AuthorizeTransaction.checksAuthorization(), Map.class);
+
+            if (authorizationResponse.getStatusCode() == HttpStatus.OK) {
+                String message = (String) authorizationResponse.getBody().get("message");
+                return ConstantVariables.AUTHORIZED.equalsIgnoreCase(message);
+            }
+            return false;
+
+        } catch (Exception e) {
             return false;
         }
     }
